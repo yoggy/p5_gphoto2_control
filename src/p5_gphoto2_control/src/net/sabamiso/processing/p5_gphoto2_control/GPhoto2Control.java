@@ -35,10 +35,12 @@ public class GPhoto2Control {
 	PApplet papplet;
 	Process process;
 	OutputStream os;
-	BufferedWriter stdin;
 	InputStream is;
+	InputStream es;
+	BufferedWriter stdin;
 	
-	ReadThread thread;
+	ReadThread thread_is;
+	ReadThread thread_es;
 	
 	String cmd = "/usr/bin/gphoto2";
 	String cmd_local = "/usr/local/bin/gphoto2";
@@ -93,6 +95,14 @@ public class GPhoto2Control {
 		stdin = null;
 		
 		try {
+			es.close();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		es = null;
+
+		try {
 			is.close();
 		}
 		catch(Exception e) {
@@ -128,10 +138,14 @@ public class GPhoto2Control {
 			
 			os = process.getOutputStream();
 			stdin = new BufferedWriter(new OutputStreamWriter(os));
-			is = process.getErrorStream();
+
+			is = process.getInputStream();
+			thread_is = new ReadThread(is);
+			thread_is.start();
 			
-			thread = new ReadThread(is);
-			thread.start();
+			es = process.getErrorStream();
+			thread_es = new ReadThread(es);
+			thread_es.start();
 			
 		} catch (IOException e) {
 			System.err.println("exec() : exec failed...cmd=" + cmd);
