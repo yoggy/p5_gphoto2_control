@@ -15,7 +15,10 @@ public class GPhoto2Control {
 	OutputStream os;
 	BufferedWriter stdin;
 	
-	String cmd = "/usr/local/bin/gphoto2 --shell --force-overwrite --filename=";
+	String cmd = "/usr/bin/gphoto2";
+	String cmd_local = "/usr/local/bin/gphoto2";
+
+	String opt = "--shell --force-overwrite --filename=";
 	String tmp_filename = "/tmp/_gphoto2_image.jpg";
 	
 	public GPhoto2Control(PApplet papplet) {
@@ -23,7 +26,15 @@ public class GPhoto2Control {
 	}
 
 	public synchronized boolean connect() {
-		return exec(cmd + tmp_filename);
+		boolean rv;
+		
+		rv = exec(cmd_local + " " +  opt + tmp_filename);
+		if (rv == true) return true;
+		
+		rv = exec(cmd + " " +  opt + tmp_filename);
+		if (rv == true) return true;
+		
+		return false;
 	}
 
 	public synchronized  PImage takePicture() {

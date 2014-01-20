@@ -14,7 +14,7 @@ public class TestMain extends PApplet{
 		gphoto2 = new GPhoto2Control(this);
 		boolean rv = gphoto2.connect();
 		if (rv == false) {
-			println("error: GPhoto2Control.connect() failed...");
+			println("error: GPho1to2Control.connect() failed...");
 			return;
 		}
 	}
