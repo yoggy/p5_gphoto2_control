@@ -3,17 +3,42 @@ package net.sabamiso.processing.p5_gphoto2_control;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
 import processing.core.PApplet;
 import processing.core.PImage;
 
+class ReadThread extends Thread {
+	InputStream is;
+	
+	public ReadThread(InputStream is) {
+		this.is = is;
+	}
+	
+	@Override
+	public void run() {
+		while(true) {
+			try {
+				is.read();
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+				break;
+			}
+		}
+	}
+}
+
 public class GPhoto2Control {
 	PApplet papplet;
 	Process process;
 	OutputStream os;
 	BufferedWriter stdin;
+	InputStream is;
+	
+	ReadThread thread;
 	
 	String cmd = "/usr/bin/gphoto2";
 	String cmd_local = "/usr/local/bin/gphoto2";
@@ -68,6 +93,14 @@ public class GPhoto2Control {
 		stdin = null;
 		
 		try {
+			is.close();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+		is = null;
+		
+		try {
 			os.close();
 		}
 		catch(Exception e) {
@@ -95,6 +128,10 @@ public class GPhoto2Control {
 			
 			os = process.getOutputStream();
 			stdin = new BufferedWriter(new OutputStreamWriter(os));
+			is = process.getErrorStream();
+			
+			thread = new ReadThread(is);
+			thread.start();
 			
 		} catch (IOException e) {
 			System.err.println("exec() : exec failed...cmd=" + cmd);
